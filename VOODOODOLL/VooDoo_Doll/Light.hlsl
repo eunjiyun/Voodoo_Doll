@@ -228,12 +228,12 @@ float4 shadowLighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs
 
 			//if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
-				if (fShadowFactor != 0.f)//±×¸²ÀÚ ¿µ¿ª
+				if (fShadowFactor != 0.f)//ï¿½×¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 				{
 					cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 					cColor += DirectionalLight(i, vNormal, vToCamera) * shadowColor * fShadowFactor;
 				}
-				else//±×¸²ÀÚx
+				else//ï¿½×¸ï¿½ï¿½ï¿½x
 					cColor = float4(0.15f, 0.15f, 0.15f, 1.0f);
 			}
 			/*else if (gLights[i].m_nType == POINT_LIGHT)

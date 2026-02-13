@@ -240,20 +240,20 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 
 void CTexture::AnimateRowColumn(XMFLOAT3& texMat, float fTime)
 {
-	texMat.x = float(m_nRow) / texMat.z;//°¡·Î
+	texMat.x = float(m_nRow) / texMat.z;//ï¿½ï¿½ï¿½ï¿½
 
 	if (4 != texMat.z)
-		texMat.y = float(m_nCol) / texMat.z;//¼¼·Î
+		texMat.y = float(m_nCol) / texMat.z;//ï¿½ï¿½ï¿½ï¿½
 	else
-		texMat.y = float(m_nCol) / (texMat.z * 1.5f);//¼¼·Î
+		texMat.y = float(m_nCol) / (texMat.z * 1.5f);//ï¿½ï¿½ï¿½ï¿½
 
 	if (0.0f == fTime)
 	{
 		if (++m_nCol == texMat.z)
 		{
 
-			++m_nRow;//°¡·Î Áõ°¡
-			m_nCol = 0; //¼¼·Î 0
+			++m_nRow;//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			m_nCol = 0; //ï¿½ï¿½ï¿½ï¿½ 0
 
 			if (4 != texMat.z)
 			{
@@ -266,12 +266,12 @@ void CTexture::AnimateRowColumn(XMFLOAT3& texMat, float fTime)
 		if (4 != texMat.z)
 		{
 			if (m_nRow == texMat.z)
-				m_nRow = 0;//°¡·Î 0
+				m_nRow = 0;//ï¿½ï¿½ï¿½ï¿½ 0
 		}
 		else
 		{
 			if (m_nRow == texMat.z * 1.5f)
-				m_nRow = 0;//°¡·Î 0
+				m_nRow = 0;//ï¿½ï¿½ï¿½ï¿½ 0
 		}
 	}
 }
@@ -437,7 +437,7 @@ void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	pd3dCommandList->SetGraphicsRoot32BitConstants(14, 4, &m_xmf4AmbientColor, 0);//Á¶¸í °ü·Ã
+	pd3dCommandList->SetGraphicsRoot32BitConstants(14, 4, &m_xmf4AmbientColor, 0);//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	pd3dCommandList->SetGraphicsRoot32BitConstants(14, 4, &m_xmf4AlbedoColor, 4);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(14, 4, &m_xmf4SpecularColor, 8);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(14, 4, &m_xmf4EmissiveColor, 12);
@@ -472,13 +472,13 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			switch (choose)
 			{
 			case 1:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Albed");//ºÎµÎ1 Ä®µç¾Ö
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Albed");//ï¿½Îµï¿½1 Ä®ï¿½ï¿½ï¿½
 				break;
 			case 2:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Albed");//ºÎµÎ2 »À´Ù±Í´Ù¸®
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Albed");//ï¿½Îµï¿½2 ï¿½ï¿½ï¿½Ù±Í´Ù¸ï¿½
 				break;
 			case 3:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Albed");//ºÎµÎ5 ¸¶¹ý»ç
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Albed");//ï¿½Îµï¿½5 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				break;
 			}
 		}
@@ -487,13 +487,13 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			switch (choose)
 			{
 			case 1:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Norma");//ºÎµÎ1 Ä®µç¾Ö
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Norma");//ï¿½Îµï¿½1 Ä®ï¿½ï¿½ï¿½
 				break;
 			case 2:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Norma");//ºÎµÎ2 »À´Ù±Í´Ù¸®
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Norma");//ï¿½Îµï¿½2 ï¿½ï¿½ï¿½Ù±Í´Ù¸ï¿½
 				break;
 			case 3:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Norma");//ºÎµÎ5 ¸¶¹ý»ç
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Norma");//ï¿½Îµï¿½5 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				break;
 			}
 		}
@@ -502,13 +502,13 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			switch (choose)
 			{
 			case 1:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Metal");//ºÎµÎ1 Ä®µç¾Ö
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Metal");//ï¿½Îµï¿½1 Ä®ï¿½ï¿½ï¿½
 				break;
 			case 2:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Metal");//ºÎµÎ2 »À´Ù±Í´Ù¸®
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Metal");//ï¿½Îµï¿½2 ï¿½ï¿½ï¿½Ù±Í´Ù¸ï¿½
 				break;
 			case 3:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Metal");//ºÎµÎ5 ¸¶¹ý»ç
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Metal");//ï¿½Îµï¿½5 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				break;
 			}
 		}
@@ -517,13 +517,13 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			switch (choose)
 			{
 			case 1:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Emiss");//ºÎµÎ1 Ä®µç¾Ö
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo1Emiss");//ï¿½Îµï¿½1 Ä®ï¿½ï¿½ï¿½
 				break;
 			case 2:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Emiss");//ºÎµÎ2 »À´Ù±Í´Ù¸®
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Emiss");//ï¿½Îµï¿½2 ï¿½ï¿½ï¿½Ù±Í´Ù¸ï¿½
 				break;
 			case 3:
-				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Emiss");//ºÎµÎ5 ¸¶¹ý»ç
+				strcpy_s(pstrTextureName, sizeof(pstrTextureName), "Voodoo2Emiss");//ï¿½Îµï¿½5 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				break;
 			}
 		}
@@ -828,7 +828,7 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource * [m_nSkinnedMeshes];
 	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4 * [m_nSkinnedMeshes];
 
-	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	for (int i{}; i < m_nSkinnedMeshes; ++i)
 	{
 		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
@@ -917,7 +917,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, short curTrack, CGame
 
 		if (m_pAnimationTracks[curTrack].m_bEnable)
 		{
-			if (2 < m_nAnimationTracks)//¹®ÀÌ ¾Æ´Ï¸é
+			if (2 < m_nAnimationTracks)//ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´Ï¸ï¿½
 			{
 				if (2 == curTrack)//player : attack
 					m_pAnimationTracks[curTrack].m_nType = ANIMATION_TYPE_ONCE;
@@ -1221,7 +1221,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootS
 						if (m_ppMaterials[i]->m_pShader)
 							m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
 
-						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);//Á¶¸í °ü·Ã
+						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 						pd3dCommandList->SetGraphicsRoot32BitConstants(1, 3, &texMat, 16);
 
 					}
@@ -1882,7 +1882,7 @@ void CBulletObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
 	SetPosition(xmf3FirePosition);
 }
 
-void CBulletObject::Animate(float fElapsedTime)//ÃÑ¾Ë ¾÷µ¥ÀÌÆ®
+void CBulletObject::Animate(float fElapsedTime)//ï¿½Ñ¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 {
 	m_fElapsedTimeAfterFire += fElapsedTime;
 

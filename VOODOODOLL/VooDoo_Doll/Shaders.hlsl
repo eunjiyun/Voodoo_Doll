@@ -126,7 +126,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] �� [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] �� [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 	}
 	else
@@ -168,23 +168,93 @@ struct VS_SKINNED_STANDARD_INPUT
 	float4 weights : BONEWEIGHT;
 };
 
+
+//VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input) 
+//위 함수 설명 
+
+//각 정점에 대해
+//
+//1️ 영향받는 뼈 찾고
+//2️ 뼈 변형 행렬 만들고
+//3️ weight로 섞어서
+//4️ 정점 위치 / 노멀 변형
+//5️ 화면 공간으로 보냄
+
+//Offset * Transform
+//=> 왜 이 순서인지 이해하려면
+//정점은 원래 모델 공간 기준 위치
+//근데 뼈는 자기 기준 좌표계
+//그래서 기준이 다름
+//그래서 바로 transform 못함
+
+//offset이 하는 일 
+//
+
+
+
+//VS_STANDARD_OUTPUT output => 이거는 결과 저장용 구조체
 VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
 
+	//이건 최종 정점 변형 행렬
+	//아무 뼈 영향도 없는 상태고 0으로 초기화
 	float4x4 mtxVertexToBoneWorld = (float4x4)0.0f;
+
 	for (int i=0; i < MAX_VERTEX_INFLUENCES; ++i)
 	{
-		mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
+		mtxVertexToBoneWorld += 
+			//input.weights[i] => 각 뼈 영향 비율
+			//예를 들면 [0.6, 0.3, 0.1, 0]
+			//weight 곱해서 더하는 이유는 정점은 보통 여러 뼈 영향 받음
+			//부드러운 관절 움직임 생성하기 위함이고 
+			//이 과정이 없으면 로봇처럼 꺾임
+			input.weights[i] * 
+			mul(
+				//gpmtxBoneOffsets => Bind Pose 역행렬
+				//정점을 뼈 기준 좌표계로 이동
+
+				//input.indices[i] => 이 정점이 영향받는 뼈 번호
+				//예를 들면 [2, 5, 7, 0]
+				//뼈2 : 60%, 뼈5 : 30%, 뼈7 : 10%
+				gpmtxBoneOffsets[input.indices[i]], 
+
+				//현재 애니메이션에서 뼈 위치
+				//CPU가 매 프레임 계산해서 GPU로 올림
+				//예를 들면 팔 들어올림, 머리 회전
+				gpmtxBoneTransforms[input.indices[i]]
+			);
 	}
 
 
+	//월드좌표 위치
+	//정점 실제 변형
+	//메쉬 움직임을 위한 코드 : 정점 위치가 뼈 따라 변함
 	output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
+
+	//노멀도 같이 변형
+	//조명 계산 때문
+	//정점만 움직이고 노멀 안 움직이면 빛 계산 깨짐
 	output.normalW = mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
+
+	//tangent/bitangent 동일 이유
+	//노멀맵 조명 위해 필요
 	output.tangentW = mul(input.tangent, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.bitangentW = mul(input.bitangent, (float3x3)mtxVertexToBoneWorld).xyz;
 
+
+
+	////표준 그래픽스 파이프라인
+	//	World
+	//	-> View
+	//	-> Projection
+	//	-> Screen
+
+
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+
+	//uv 전달
+	//텍스처 샘플링용
 	output.uv = input.uv;
 
 	return(output);
@@ -327,17 +397,17 @@ VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
 	
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	
-	if (texMat.z == 6 )//���� 
+	if (texMat.z == 6 )//���� 
 	{
 		output.uv.x = (input.uv.x) / texMat.z + texMat.x;
 		output.uv.y = input.uv.y / texMat.z + texMat.y;
 	}
-	else if (texMat.z == 4)//�ε� ��ƼŬ
+	else if (texMat.z == 4)//�ε� ��ƼŬ
 	{
 		output.uv.x = (input.uv.x) / texMat.z + texMat.x;
 		output.uv.y = input.uv.y / (texMat.z*1.5f) + texMat.y;
 	}
-	else//�� ȭ��
+	else//�� ȭ��
 		output.uv = input.uv;
 
 	return(output);
@@ -395,7 +465,7 @@ static float gfGaussianBlurMask2D[5][5] = {
 	{ 1.0f / 273.0f, 4.0f / 273.0f, 7.0f / 273.0f, 4.0f / 273.0f, 1.0f / 273.0f }
 };
 
-#define MotionBlurStrength 5.1f // ��� ���� ����
+#define MotionBlurStrength 5.1f // ��� ��� ����
 
 [numthreads(32, 32, 1)]
 
@@ -412,6 +482,7 @@ void CSGaussian2DBlur(int3 n3GroupThreadID : SV_GroupThreadID, int3 n3DispatchTh
 		{
 			for (int j = -2; j <= 2; ++j)
 			{
+				//
 				float2 offset = float2(i, j) * MotionBlurStrength;
 				f4Color += gfGaussianBlurMask2D[i + 2][j + 2]/float(1.03) * gtxtInput[n3DispatchThreadID.xy + offset];
 			}
