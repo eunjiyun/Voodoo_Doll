@@ -86,9 +86,13 @@ struct VS_STANDARD_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
+
+	//정점 위에서의 좌표계 3축
 	float3 normalW : NORMAL;
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
+
+
 	float2 uv : TEXCOORD;
 };
 
@@ -105,6 +109,29 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 
 	return(output);
 }
+
+
+//정점 안에 들어있는 정보
+//position normal tangent bitangent
+//normal : 표면이 위로 향하고 있는 방향
+//tangent : 표면에서 "가로 방향"
+//bitangent : 표면에서 "세로 방향"
+//이 세 개가 모이면 Tangent Space 좌표계가 만들어짐
+//normal은 회전했는데 tangent가 원래 방향 그대로면 TBN 축이 서로 직교하지 않게 됨
+//좌표계가 찌그러짐
+
+//메쉬는 그냥 평면인데
+//노멀맵을 쓰면 돌이 튀어나온 것처럼 보이게 빛이 다르게 반사되게 만듦
+//노멀맵 텍스처 안에 저장된 노멀은
+//월드 좌표 기준이 아님
+//텍스처 기준 좌표(Tangent Space) 기준
+//노멀맵의 RGB는 이렇게 해석됨
+//R -> tangent 방향
+//G -> bitangent 방향
+//B -> normal 방향
+//이 3축이 있어야 노멀맵의 벡터를 월드 공간으로 바꿀 수 있음.
+//rgb는 각각 T, B, N 방향으로 얼마나 기울어졌는지를 의미함.
+
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
@@ -125,6 +152,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
+		//이 행렬은 
+		//tangent space -> world space로 변환하는 행렬
+		//흐름을 그림으로 정리
+		//노멀맵 텍스처 -> TBN 곱함 -> World Space Normal -> Lighting 계산
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
 		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] �� [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
@@ -134,6 +165,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		normalW = normalize(input.normalW);
 	}
 
+	//조명은 여기서 쓰임.
 	float4 cIllumination = Lighting(input.positionW, normalW);
 	
 	if (cColor.x == 1 && cColor.y == 1 && cColor.z == 1)
@@ -186,10 +218,33 @@ struct VS_SKINNED_STANDARD_INPUT
 //근데 뼈는 자기 기준 좌표계
 //그래서 기준이 다름
 //그래서 바로 transform 못함
+//현재 뼈 위치 x (정점을 뼈 기준으로 옮긴 것)
+
+
+//=>Transform * Offset 
+//이렇게 반대로 하면
+//정점 아직 뼈 기준도 아닌 상태
+//뼈 움직임 먼저 적용
+//그 다음 뼈공간 이동
+//결과 : 메쉬 찢어짐, 관절 터짐, 팔이 몸에서 분리됨, 스파게티 메쉬
+
+//손 위치를 팔꿈치 기준으로 옮기고 
+//=> 몸 기준에서 손 먼저 회전시키고, 팔꿈치 기준 이동
+//결과 : 행렬 순서 변경에 따른 결과 변경 발생
 
 //offset이 하는 일 
-//
+//Offset = BindPos 역행렬
 
+//정점을 "뼈 기준 공간"으로 옮김
+//정점 : 모델 기준 위치 => Offset 적용 => 정점 : 뼈 기준 위치
+//=> 뼈 회전은 뼈 기준 원점 중심으로 회전
+//Offset이 없으면
+//뼈 공간으로 이동 안 한 채로 회전
+//Offset이 없으면,
+//안 움직이는 게 아니라, 잘못된 축 기준으로 망가져 움직인다
+
+
+//뼈 기준 공간에 있는 정점 => Transform 적용 => 움직인 결과
 
 
 //VS_STANDARD_OUTPUT output => 이거는 결과 저장용 구조체
@@ -213,6 +268,7 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 			mul(
 				//gpmtxBoneOffsets => Bind Pose 역행렬
 				//정점을 뼈 기준 좌표계로 이동
+				//정점을 뼈 기준 공간으로 옮겨주는 행렬
 
 				//input.indices[i] => 이 정점이 영향받는 뼈 번호
 				//예를 들면 [2, 5, 7, 0]
@@ -230,6 +286,8 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	//월드좌표 위치
 	//정점 실제 변형
 	//메쉬 움직임을 위한 코드 : 정점 위치가 뼈 따라 변함
+	//정점을 뼈 행렬로 변형함
+	//여기서 모델이 실제로 휘어지고 움직임
 	output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
 
 	//노멀도 같이 변형
@@ -290,7 +348,6 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 {
 	input.normalW = normalize(input.normalW);
-
 	return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
 }
 //===============================================================================================================
@@ -311,13 +368,12 @@ PS_DEPTH_OUTPUT PSDepthWriteShader(VS_LIGHTING_OUTPUT input)
 	return(output);
 }
 
-//=======================================================================================================================
+//==================================================================================================================
 struct VS_SHADOW_MAP_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
-
 	float4 uvs[MAX_SHADOW_LIGHTS] : TEXCOORD0;
 };
 
@@ -329,7 +385,6 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	output.positionW = positionW.xyz;
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
-
 
 	for (int i = 0; i < MAX_SHADOW_LIGHTS; ++i)
 	{
@@ -354,9 +409,7 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uvs[0].xy);
 
 	float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
-
 	float4 cIllumination = shadowLighting(input.positionW, normalize(input.normalW), true, input.uvs);
-
 	return(lerp(cColor, cIllumination, 0.5f));
 }
 //===================================================================================================================================
