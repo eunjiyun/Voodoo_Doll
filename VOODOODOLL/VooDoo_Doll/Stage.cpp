@@ -152,7 +152,6 @@ void CStage::BuildDefaultLightsAndMaterials()
 			m_pLights[i].m_fFalloff = 100.0f;
 			m_pLights[i].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 			m_pLights[i].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-
 		}
 	}
 }

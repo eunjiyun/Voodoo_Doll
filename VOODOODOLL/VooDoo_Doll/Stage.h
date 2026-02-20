@@ -195,7 +195,7 @@ public:
 	CGameObject** userPw = nullptr;
 	CMultiSpriteObjectsShader* pMultiSpriteObjectShader = nullptr;
 
-	//°è»ê ¼ÎÀÌ´õ
+	//ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½
 	ID3D12RootSignature* m_pd3dComputeRootSignature = NULL;
 
 	CGaussian2DBlurComputeShader** pComputeShader = nullptr;
@@ -209,12 +209,12 @@ public:
 	
 	DXGI_FORMAT compShaderFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 
-	// °¢ ¹®¸¶´Ù ¿­¸®´Â Á¶°ÇÀ» ´Þ¼ºÇßÀ» °æ¿ì true·Î ÀüÈ¯
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ trueï¿½ï¿½ ï¿½ï¿½È¯
 	bool										b1stDoorPass = false;
 	bool										b2ndDoorPass = false;
 	bool										b3rdDoorPass = false;
 	bool										b4thDoorPass = false;
-	bool										b5thDoorPass = false;// ¹® Åë°ú
+	bool										b5thDoorPass = false;// ï¿½ï¿½ ï¿½ï¿½ï¿½
 
 	vector<int>							DeleteObject;
 	int											iGetItem = 0;
