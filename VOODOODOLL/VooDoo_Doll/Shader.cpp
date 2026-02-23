@@ -1206,6 +1206,12 @@ void CDepthRenderShader::ReleaseShaderVariables()
 	}
 }
 
+
+//동적 그림자 처리를 위해 ShadowMap 구현
+//라이트 위치에 가상의 카메라를 두고,
+//해당 시점에서 장면을 Depth 텍스처에 렌더링
+//이후 메인 렌더링 단계에서 현재 픽셀을 라이트 좌표계로 변환해
+//ShadowMap의 Depth 값과 비교하여 그림자 여부를 판별함.
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList, LIGHT* m_pLights, vector<CMonster*> Monsters, vector<CPlayer*> Players)
 {
 	for (int j{}; j < MAX_SHADOW_LIGHTS; ++j)
@@ -1219,6 +1225,12 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 			XMMATRIX xmmtxView = DirectX::XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));//assertion failed
 
 			float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
+
+
+		/*	Directional Light는 태양처럼 광선이 평행하게 들어오기 때문에 원근 왜곡이 없으며, 
+				따라서 Orthographic Projection을 사용함.
+				반면 Spot Light는 특정 위치에서 원뿔 형태로 퍼지기 때문에 
+				시야각을 반영해야 하므로 Perspective Projection을 사용함.*/
 
 			XMMATRIX xmmtxProjection;
 			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
