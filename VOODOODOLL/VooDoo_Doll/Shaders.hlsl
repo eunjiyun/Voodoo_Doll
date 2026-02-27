@@ -535,7 +535,6 @@ void CSGaussian2DBlur(int3 n3GroupThreadID : SV_GroupThreadID, int3 n3DispatchTh
 		{
 			for (int j = -2; j <= 2; ++j)
 			{
-				//
 				float2 offset = float2(i, j) * MotionBlurStrength;
 				f4Color += gfGaussianBlurMask2D[i + 2][j + 2]/float(1.03) * gtxtInput[n3DispatchThreadID.xy + offset];
 			}

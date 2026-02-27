@@ -21,7 +21,7 @@ CMesh::~CMesh()
 	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
 	if (m_nSubMeshes > 0)
 	{
-		for (int i = 0; i < m_nSubMeshes; i++)
+		for (int i{}; i < m_nSubMeshes; ++i)
 		{
 			if (m_ppd3dSubSetIndexBuffers[i]) m_ppd3dSubSetIndexBuffers[i]->Release();
 			if (m_ppnSubSetIndices[i]) delete[] m_ppnSubSetIndices[i];
@@ -46,7 +46,7 @@ void CMesh::ReleaseUploadBuffers()
 
 	if ((m_nSubMeshes > 0) && m_ppd3dSubSetIndexUploadBuffers)
 	{
-		for (int i = 0; i < m_nSubMeshes; i++)
+		for (int i{}; i < m_nSubMeshes; ++i)
 		{
 			if (m_ppd3dSubSetIndexUploadBuffers[i]) m_ppd3dSubSetIndexUploadBuffers[i]->Release();
 		}
@@ -325,7 +325,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{
 			nReads = (UINT)::fread(&nPositions, sizeof(int), 1, pInFile);
-			if (nPositions > 0)
+			if (0<nPositions )
 			{
 				m_nType |= VERTEXT_POSITION;
 				m_pxmf3Positions = new XMFLOAT3[nPositions];
@@ -342,7 +342,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<Colors>:"))
 		{
 			nReads = (UINT)::fread(&nColors, sizeof(int), 1, pInFile);
-			if (nColors > 0)
+			if (0<nColors )
 			{
 				m_nType |= VERTEXT_COLOR;
 				m_pxmf4Colors = new XMFLOAT4[nColors];
@@ -354,7 +354,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<TextureCoords0>:"))
 		{
 			nReads = (UINT)::fread(&nTextureCoords, sizeof(int), 1, pInFile);
-			if (nTextureCoords > 0)
+			if (0<nTextureCoords)
 			{
 				m_nType |= VERTEXT_TEXTURE_COORD0;
 				m_pxmf2TextureCoords0 = new XMFLOAT2[nTextureCoords];
@@ -370,7 +370,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<TextureCoords1>:"))
 		{
 			nReads = (UINT)::fread(&nTextureCoords, sizeof(int), 1, pInFile);
-			if (nTextureCoords > 0)
+			if (0<nTextureCoords )
 			{
 				m_nType |= VERTEXT_TEXTURE_COORD1;
 				m_pxmf2TextureCoords1 = new XMFLOAT2[nTextureCoords];
@@ -386,7 +386,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<Normals>:"))
 		{
 			nReads = (UINT)::fread(&nNormals, sizeof(int), 1, pInFile);
-			if (nNormals > 0)
+			if (0<nNormals )
 			{
 				m_nType |= VERTEXT_NORMAL;
 				m_pxmf3Normals = new XMFLOAT3[nNormals];
@@ -402,7 +402,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<Tangents>:"))
 		{
 			nReads = (UINT)::fread(&nTangents, sizeof(int), 1, pInFile);
-			if (nTangents > 0)
+			if (0<nTangents )
 			{
 				m_nType |= VERTEXT_TANGENT;
 				m_pxmf3Tangents = new XMFLOAT3[nTangents];
@@ -418,7 +418,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<BiTangents>:"))
 		{
 			nReads = (UINT)::fread(&nBiTangents, sizeof(int), 1, pInFile);
-			if (nBiTangents > 0)
+			if (0<nBiTangents )
 			{
 				m_pxmf3BiTangents = new XMFLOAT3[nBiTangents];
 				nReads = (UINT)::fread(m_pxmf3BiTangents, sizeof(XMFLOAT3), nBiTangents, pInFile);
@@ -433,7 +433,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		else if (!strcmp(pstrToken, "<SubMeshes>:"))
 		{
 			nReads = (UINT)::fread(&(m_nSubMeshes), sizeof(int), 1, pInFile);
-			if (m_nSubMeshes > 0)
+			if (0<m_nSubMeshes )
 			{
 				m_pnSubSetIndices = new int[m_nSubMeshes];
 				m_ppnSubSetIndices = new UINT * [m_nSubMeshes];
@@ -442,15 +442,15 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [m_nSubMeshes];
 				m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
 
-				for (int i = 0; i < m_nSubMeshes; i++)
+				for (int i{}; i < m_nSubMeshes; ++i)
 				{
 					::ReadStringFromFile(pInFile, pstrToken);
 					if (!strcmp(pstrToken, "<SubMesh>:"))
 					{
-						int nIndex = 0;
+						int nIndex{};
 						nReads = (UINT)::fread(&nIndex, sizeof(int), 1, pInFile);
 						nReads = (UINT)::fread(&(m_pnSubSetIndices[i]), sizeof(int), 1, pInFile);
-						if (m_pnSubSetIndices[i] > 0)
+						if (0<m_pnSubSetIndices[i])
 						{
 							m_ppnSubSetIndices[i] = new UINT[m_pnSubSetIndices[i]];
 							nReads = (UINT)::fread(m_ppnSubSetIndices[i], sizeof(UINT), m_pnSubSetIndices[i], pInFile);
@@ -543,7 +543,7 @@ void CSkinnedMesh::ReleaseUploadBuffers()
 
 void CSkinnedMesh::PrepareSkinning(CGameObject* pModelRootObject)
 {
-	for (int j = 0; j < m_nSkinningBones; j++)
+	for (int j{}; j < m_nSkinningBones; ++j)
 	{
 		m_ppSkinningBoneFrameCaches[j] = pModelRootObject->FindFrame(m_ppstrSkinningBoneNames[j]);
 	}
@@ -741,7 +741,7 @@ void CTexturedRectMesh::Scale(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 {
 	m_nVertices = 6;
 
-	for (int i = 0; i < m_nVertices; ++i)
+	for (int i{}; i < m_nVertices; ++i)
 	{
 		pVertices[i].m_xmf3Position = Vector3::ScalarProduct(Vertices[i].m_xmf3Position, _scale, false);
 	}

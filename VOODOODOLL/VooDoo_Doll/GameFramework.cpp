@@ -1128,7 +1128,6 @@ void CGameFramework::FrameAdvance()
 				for (int i{}; i < 10; ++i)
 					m_pStage->userId[i]->SetPosition(50, -50, 559 + 12 * i);
 
-
 			}
 			else if (532 <= m_ptOldCursorPos.x - windowX && 595 >= m_ptOldCursorPos.x - windowX
 				&& 348 <= m_ptOldCursorPos.y - windowY && 385 >= m_ptOldCursorPos.y - windowY)//exit

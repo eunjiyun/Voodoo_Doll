@@ -972,9 +972,15 @@ ID3D12RootSignature* CStage::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[8].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[5]);
 	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+
+	//멤버를 잘못 건드림
 	pd3dRootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//17->9
 	pd3dRootParameters[9].Descriptor.ShaderRegister = 5; //DrawOptions
-	pd3dRootParameters[9].Constants.RegisterSpace = 0;
+
+	//파라미터 타입이 CBV인데, Constants.RegisterSpace를 쓰고 있음.
+	//pd3dRootParameters[9].Constants.RegisterSpace = 0;
+	pd3dRootParameters[9].Descriptor.RegisterSpace = 0;
+
 	pd3dRootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -1012,8 +1018,6 @@ ID3D12RootSignature* CStage::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[16].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[16].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[6]; //Texture2D
 	pd3dRootParameters[16].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-
 
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
@@ -1284,7 +1288,8 @@ void CStage::Render(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Device* pd
 	if (m_pd3dGraphicsRootSignature)
 		pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	if (m_pd3dCbvSrvDescriptorHeap) 
+		pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 
 
 	if (m_pDepthRenderShader)
@@ -1294,8 +1299,6 @@ void CStage::Render(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Device* pd
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
-
-
 
 	if (login)
 	{
@@ -1799,7 +1802,7 @@ void CStage::CheckDoorCollisions(float fTimeElapsed, CPlayer*& pl)
 void CStage::Lighthing(CPlayer*& pl)
 {
 
-	for (int iNum = 6; iNum < MAX_LIGHTS; ++iNum)
+	for (int iNum{ 6 }; iNum < MAX_LIGHTS; ++iNum)
 	{
 		float fDisatnce = CalculateDistance(pl->obBox.Center, m_pLights[iNum].m_xmf3Position);
 
