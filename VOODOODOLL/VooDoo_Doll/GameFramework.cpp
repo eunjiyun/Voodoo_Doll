@@ -605,7 +605,7 @@ void CGameFramework::BuildObjects()
 
 	DXGI_FORMAT RtvFormats[5] = { DXGI_FORMAT_R32_FLOAT,DXGI_FORMAT_R32_FLOAT,DXGI_FORMAT_R32_FLOAT,DXGI_FORMAT_R32_FLOAT,DXGI_FORMAT_R32_FLOAT };
 
-	for (int i = 1; i <= 2; ++i) {
+	for (int i{ 1 }; i <= 2; ++i) {
 		for (int j{}; j < 3; ++j) {
 			pMonsterModel[i].push(
 				CGameObject::LoadGeometryAndAnimationFromFile(m_pd3dDevice, m_pd3dCommandList, m_pStage->GetGraphicsRootSignature(), binFileNames[i], NULL, i + 1));
@@ -1060,14 +1060,41 @@ void CGameFramework::MoveToNextFrame()
 {
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 
+	//백버퍼(프레임)마다 관리하는 fence 값 배열 m_nFenceValues[]가 있고,
+	//현재 백버퍼 인덱스에 해당하는 fence 값을 1 증가시켜 새 fence 목표값( nFenceValue )로 씀.
+	//fence 값은 GPU 진행도를 표시하는 순번(타임스탬프 같은 단조 증가 값)임.
 	UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
+
+	//커맨드 큐에 Fence에 nFenceValue를 찍으라는 신호를 넣음
+	//의미 : GPU가 커맨드 큐를 실행하다가 이 Signal 지점까지 도달하면 
+	//m_pd3dFence 값이 nFenceValue 이상이 됨.
+	//즉, 여기까지의 GPU 작업이 끝났다는 기준점을 만드는 작업
 	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
 
 	if (m_pd3dFence->GetCompletedValue() < nFenceValue)
 	{
+		//GPU가 fence에 nFenceValue를 달성하면 m_hFenceEvent 이벤트를 신호 상태로 만들어야 함.
 		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
+
+		//그 이벤트가 올 때까지 CPU 스레드 블로킹(무한 대기) 함.
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
+
+	//결과적으로 CPU는 GPU가 해당 지점까지 끝날 때까지 기다림.
+	//(즉, 프레임을 겹쳐서 진행하지 못하고 동기화로 멈출 수 있음.)
+
+	//현재 백버퍼(프레임 리소스)에 대해 설정한 fence 값까지 GPU가 끝날 때까지 기다리므로,
+	//그 백버퍼/프레임 리소를 다시 쓰기 전에 GPU가 아직 사용 중인 상황을 피할 수 있음.
+	//안정성은 좋아지지만, 매 프레임 대기가 발생하면 CPU-GPU 병렬성이 줄어 FPS가 떨어질 수 있음.
+
+
+
+	//MS D3D12 샘플에서는 보통 :
+	//1. 프레임 끝에서 fence를 signal 해두고
+	//2. 다음에 사용할 프레임 리소스(다음 백버퍼 인덱스)가 아직 GPU에서 안 끝났으면 그때 wait
+	//처럼 다음 프레임 리소스 재사용 시점에 기다려서 프레임 겹치기(트리플 버퍼링 이점)을 살림
+	//지금코드도 동기화 자체는 맞지만, 호출 위치/인덱스 갱신 타이밍에 따라 불필요하게 자주
+	//기다리는 구조가 될 수 있음.
 }
 
 //#define _WITH_PLAYER_TOP
@@ -1305,7 +1332,6 @@ void CGameFramework::FrameAdvance()
 					if (0 == u)
 						m_pStage->userId[userId.size() - 1]->SetMesh(0, m_pStage->m_ppShaders[0]->m_ppObjects[166]->m_ppMeshes[0]);
 				}
-
 			}
 
 			if (!gameEnd)

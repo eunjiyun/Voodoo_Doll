@@ -136,7 +136,7 @@ void CStage::BuildDefaultLightsAndMaterials()
 		m_pLights[5].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 		m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
-		for (int i = 6; i < MAX_LIGHTS; ++i)
+		for (int i{ 6 }; i < MAX_LIGHTS; ++i)
 		{
 			m_pLights[i].m_bEnable = false;
 			m_pLights[i].m_nType = POINT_LIGHT;
